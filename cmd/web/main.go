@@ -3,6 +3,7 @@ package main
 import (
 	"html/template"
 	"io"
+	"os"
 	"strings"
 
 	"github.com/labstack/echo/v5"
@@ -37,8 +38,14 @@ func newTemplate() *Template {
 }
 
 func main() {
+	dbp := os.Getenv("DB_PATH")
+	if dbp == "" {
+		dbp = "data.db"
+	}
 
-	db := db.NewSQLiteDB("../../data.db")
+	reset := os.Getenv("APP_ENV") != "production"
+
+	db := db.NewSQLiteDB(dbp, reset)
 	defer db.Close()
 
 	lu := model.NewSQliteLookup(db)

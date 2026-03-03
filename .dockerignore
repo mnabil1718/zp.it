@@ -1,0 +1,6 @@
+.git
+tmp/
+data.db
+node_modules/
+*.md
+.air.toml

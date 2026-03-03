@@ -8,13 +8,17 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func NewSQLiteDB(path string) *sql.DB {
+func NewSQLiteDB(path string, reset bool) *sql.DB {
 
-	// empty db each start up
-	if _, err := os.Stat(path); err == nil {
-		err := os.Remove(path)
-		if err != nil {
-			log.Fatal(err)
+	reset := os.Getenv("APP_ENV") != "production"
+
+	if reset {
+		// empty db each start up
+		if _, err := os.Stat(path); err == nil {
+			err := os.Remove(path)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
 

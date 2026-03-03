@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "css:watch": "npx @tailwindcss/cli -i ./static/style.css -o ./static/output.css --watch"
+    "css:build": "npx @tailwindcss/cli -i ./static/style.css -o ./static/output.css"
   },
   "keywords": [],
   "author": "",
