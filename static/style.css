@@ -4,3 +4,19 @@
 @theme {
   --font-sans: "Plus Jakarta Sans", "sans-serif";
 }
+
+.my-indicator {
+  display: none;
+}
+.htmx-request .my-indicator,
+.htmx-request.my-indicator {
+  display: inline;
+}
+
+.my-no-indicator {
+  display: inline;
+}
+.htmx-request .my-no-indicator,
+.htmx-request.my-no-indicator {
+  display: none;
+}

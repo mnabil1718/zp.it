@@ -9,11 +9,16 @@
       <script src="https://unpkg.com/htmx.org@2/dist/htmx.min.js"></script>
     </head>
     <body>
-      <main
-        class="min-h-screen flex flex-col justify-center items-center bg-slate-50 text-slate-600"
-      >
-        {{ block "content" . }}{{ end }}
-      </main>
+      <div class="min-h-screen flex flex-col bg-slate-50 text-slate-600">
+        <main class="flex-1 flex flex-col justify-center items-center">
+          {{ block "content" . }}{{ end }}
+        </main>
+        <footer
+          class="border-t border-slate-300 p-3 text-sm text-slate-400 text-center"
+        >
+          Copyright &copy 2026 Zp.it Built with go + htmx.
+        </footer>
+      </div>
     </body>
   </html>
 {{ end }}

@@ -3,6 +3,7 @@ package main
 import (
 	"html/template"
 	"io"
+	"strings"
 
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
@@ -17,8 +18,15 @@ func (t *Template) Render(c *echo.Context, w io.Writer, name string, data any) e
 }
 
 func newTemplate() *Template {
+	funcs := template.FuncMap{
+		"stripScheme": func(url string) string {
+			url = strings.TrimPrefix(url, "https://")
+			url = strings.TrimPrefix(url, "http://")
+			return url
+		},
+	}
 	return &Template{
-		templates: template.Must(template.ParseGlob("ui/*.html")),
+		templates: template.Must(template.New("").Funcs(funcs).ParseGlob("ui/*.html")),
 	}
 }
 

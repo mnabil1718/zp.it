@@ -1,37 +1,45 @@
 {{ define "result" }}
-  <div
-    class="mt-6 p-5 bg-white rounded-md outline-1 outline-slate-200 text-left"
-  >
-    <p class="text-xs text-slate-400 mb-1">Your short link is ready</p>
-
-    <div class="flex items-center gap-2">
+  <div class="mt-7 p-5 bg-white rounded-lg text-left border border-slate-300">
+    <h2 class=" text-center text-xl font-bold mb-7">Your link is ready! 🎉</h2>
+    <div
+      class="flex flex-col justify-center items-center gap-2 p-5 bg-slate-200 rounded-md"
+    >
       <a
         href="{{ .Short }}"
         target="_blank"
-        class="flex-1 text-sky-800 font-semibold text-lg truncate hover:underline"
+        class="flex-1 text-sky-800 font-bold text-xl tracking-tight truncate hover:underline mb-3"
       >
-        {{ .Short }}
+        {{ .Short | stripScheme }}
       </a>
       <button
-        onclick="navigator.clipboard.writeText('{{ .Short }}')"
-        class="flex-none px-3 py-1.5 text-xs font-semibold border border-slate-200
-             rounded-md hover:bg-slate-50 cursor-pointer transition"
+        onclick="
+        navigator.clipboard.writeText('{{ .Short }}');
+        this.textContent = 'Copied!';
+        setTimeout(() => {
+        this.textContent = 'Copy Link';
+        }, 2000);
+      "
+        class="flex-none bg-sky-800 text-white px-4 py-3 text-sm font-semibold rounded-md cursor-pointer transition-colors duration-200"
       >
-        Copy
+        Copy Link
       </button>
     </div>
 
-    <p class="text-xs text-slate-400 mt-2 truncate">
-      Original: {{ .Original }}
-    </p>
-
     {{ if .QRCode }}
-      <div class="mt-4 flex justify-center">
+      <div class="mt-4 flex flex-col items-center gap-5">
         <img
           src="data:image/png;base64,{{ .QRCode }}"
           alt="QR Code"
-          class="size-40 rounded-md border border-slate-200"
+          class="max-w-xs aspect-square w-full rounded-md border border-slate-200"
         />
+
+        <a
+          href="data:image/png;base64,{{ .QRCode }}"
+          download="qr-{{ .Short | stripScheme }}.png"
+          class="flex-none bg-sky-800 text-white px-4 py-3 text-sm font-semibold rounded-md cursor-pointer transition-colors duration-200"
+        >
+          Download QR
+        </a>
       </div>
     {{ end }}
   </div>
