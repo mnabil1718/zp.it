@@ -10,7 +10,7 @@ services:
       - PORT=8080
       - DB_PATH=/app/data/data.db
       - HOST="http://localhost:8080"
-      - REDIS_URL="redis:6379"
+      - REDIS_URL=redis:6379
     restart: unless-stopped
     depends_on:
       - redis
