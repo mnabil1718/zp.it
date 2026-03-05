@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/base64"
+	"errors"
 	"net/http"
 
 	"github.com/labstack/echo/v5"
+	"github.com/mnabil1718/zp.it/internal/model"
 	qrlib "github.com/mnabil1718/zp.it/internal/qr"
 	"github.com/mnabil1718/zp.it/internal/shortener"
 )
@@ -13,8 +15,13 @@ func (a *App) Health(c *echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]any{"status": "ok"})
 }
 
+type IndexData struct {
+	Host string
+}
+
 func (a *App) Index(c *echo.Context) error {
-	return c.Render(200, "index", nil)
+	data := IndexData{Host: a.Config.Host}
+	return c.Render(200, "index", data)
 }
 
 type Result struct {
@@ -25,7 +32,13 @@ type Result struct {
 
 func (a *App) Generate(c *echo.Context) error {
 	url := c.FormValue("url")
+	alias := c.FormValue("alias")
 	qr := c.FormValue("qr") == "on"
+	var code string
+
+	if alias != "" {
+		code = alias
+	}
 
 	code, err := shortener.Shorten(6)
 	if err != nil {
@@ -60,6 +73,11 @@ func (a *App) CodeHandler(c *echo.Context) error {
 
 	origin, err := a.Models.Lookup.GetByCode(cd)
 	if err != nil {
+
+		if errors.Is(err, model.ErrNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, "Short link is not found")
+		}
+
 		return echo.NewHTTPError(http.StatusInternalServerError, "Cannot lookup URL data")
 	}
 

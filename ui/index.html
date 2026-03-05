@@ -6,9 +6,7 @@
 
 {{ block "content" . }}
   <div class="w-full max-w-3xl mx-auto text-center py-10 px-5">
-    <div id="error-display">
-      {{ template "error-message" . }}
-    </div>
+    <div id="error-display"></div>
     <h1 class="text-2xl md:text-4xl font-medium mb-3">
       Zp.it - Fast, Simplified URL Shortener
     </h1>
@@ -21,6 +19,30 @@
       hx-swap="innerHTML"
       hx-disabled-elt="find button[type='submit']"
     >
+      <!-- custom alias input (hidden by default) -->
+      <div id="custom-alias-row" class="hidden flex items-center gap-2 mb-2">
+        <span class="text-sm font-semibold text-slate-500 whitespace-nowrap"
+          >{{ .Host | stripScheme }}</span
+        >
+        <input
+          id="alias"
+          type="text"
+          name="alias"
+          placeholder="custom-alias"
+          pattern="[a-zA-Z0-9\-_]+"
+          minlength="3"
+          maxlength="24"
+          class="block w-full rounded-md bg-white px-4.5 py-3 text-base text-slate-600 outline-1 -outline-offset-1 outline-slate-600/30 placeholder:text-slate-400 focus:outline-2 focus:-outline-offset-2 focus:outline-sky-800"
+          oninput="
+      if (this.validity.patternMismatch) {
+        this.setCustomValidity('Only letters, numbers, hyphens and underscores allowed');
+      } else {
+        this.setCustomValidity('');
+      }
+    "
+        />
+      </div>
+      <!-- MAIN INPUT -->
       <div class="flex items-center gap-2">
         <input
           id="url"
@@ -63,6 +85,24 @@
         </button>
       </div>
 
+      <!-- custom alias toggle checkbox -->
+      <div class="flex items-center gap-2 mt-3">
+        <input
+          type="checkbox"
+          id="custom-alias-toggle"
+          class="size-4 accent-sky-800 cursor-pointer"
+          onchange="document.getElementById('custom-alias-row').classList.toggle('hidden', !this.checked);
+              if (!this.checked) document.getElementById('alias').value = '';"
+        />
+        <label
+          for="custom-alias-toggle"
+          class="text-sm text-slate-500 cursor-pointer font-medium"
+        >
+          Use a custom alias
+        </label>
+      </div>
+
+      <!-- QR Checkbox -->
       <div class="flex items-center gap-2 mt-3">
         <input
           type="checkbox"
@@ -77,6 +117,8 @@
         >
       </div>
     </form>
+
+    <!-- RESULT SECTION -->
     <div id="result"></div>
   </div>
 {{ end }}

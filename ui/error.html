@@ -1,0 +1,29 @@
+{{ define "error-page" }}
+  <!doctype html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Zp.it - Link Not Found</title>
+      <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+      <link href="/static/output.css" rel="stylesheet" />
+      <script src="https://unpkg.com/htmx.org@2/dist/htmx.min.js"></script>
+    </head>
+    <body>
+      <div class="min-h-screen flex flex-col bg-slate-50 text-slate-600">
+        <main class="flex-1 flex flex-col justify-center items-center">
+          <div class="max-w-3xl mx-auto text-center">
+            <h1 class="text-3xl font-bold mb-2">{{ .Code }}</h1>
+            <p class="mb-5">{{ .Error }}</p>
+            <a href="/" class="underline">Go home</a>
+          </div>
+        </main>
+        <footer
+          class="border-t border-slate-300 p-3 text-sm text-slate-400 text-center"
+        >
+          Copyright &copy 2026 Zp.it Built with go + htmx.
+        </footer>
+      </div>
+    </body>
+  </html>
+{{ end }}

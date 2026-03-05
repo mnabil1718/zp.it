@@ -62,6 +62,9 @@ func (app *App) setupServer() {
 	e := echo.New()
 	e.Renderer = newTemplate()
 	e.Static("/static", "static")
+	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
+		Level: 5,
+	}))
 	e.Use(middleware.RequestLogger())
 	e.HTTPErrorHandler = ErrorHandler
 

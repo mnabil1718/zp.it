@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -61,6 +62,11 @@ func (l *SQLiteLookup) GetByCode(code string) (string, error) {
 	}
 
 	if err := l.db.QueryRow(SQL, code).Scan(&origin); err != nil {
+		fmt.Println("HAHAHAH ERRRORRR DBBBB")
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", ErrNotFound
+		}
+
 		return "", err
 	}
 
