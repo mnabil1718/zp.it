@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"net/http"
 	urlib "net/url"
 	"strings"
@@ -66,6 +67,7 @@ func (a *App) Generate(c *echo.Context) error {
 			return echo.NewHTTPError(http.StatusConflict, "Code alias already exists")
 		}
 
+		fmt.Println(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save lookup data")
 	}
 
@@ -91,7 +93,7 @@ func (a *App) Generate(c *echo.Context) error {
 func (a *App) CodeHandler(c *echo.Context) error {
 	cd := c.Param("code")
 
-	origin, err := a.Models.Lookup.GetByCode(cd)
+	lkp, err := a.Models.Lookup.GetByCode(cd)
 	if err != nil {
 
 		if errors.Is(err, model.ErrNotFound) {
@@ -101,5 +103,5 @@ func (a *App) CodeHandler(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Cannot lookup URL data")
 	}
 
-	return c.Redirect(http.StatusFound, origin)
+	return c.Redirect(http.StatusFound, lkp.Origin)
 }

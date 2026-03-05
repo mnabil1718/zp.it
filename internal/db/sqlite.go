@@ -35,7 +35,9 @@ func NewSQLiteDB(path string, reset bool) *sql.DB {
         CREATE TABLE IF NOT EXISTS lookup (
             id     INTEGER PRIMARY KEY AUTOINCREMENT,
             origin TEXT NOT NULL,
-            code   TEXT NOT NULL UNIQUE
+            code   TEXT NOT NULL UNIQUE,
+			clicks INTEGER NOT NULL DEFAULT 0,
+			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
         CREATE INDEX IF NOT EXISTS idx_lookup_code ON lookup(code);
     `

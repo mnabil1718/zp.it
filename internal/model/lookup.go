@@ -12,14 +12,16 @@ import (
 )
 
 type Lookup struct {
-	id     int
-	origin string
-	code   string
+	ID        int       `json:"id"`
+	Origin    string    `json:"origin"`
+	Code      string    `json:"code"`
+	Clicks    int       `json:"clicks"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type ILookup interface {
 	Insert(origin, code string) error
-	GetByCode(code string) (string, error)
+	GetByCode(code string) (*Lookup, error)
 }
 
 type SQLiteLookup struct {
@@ -35,8 +37,17 @@ func NewSQliteLookup(db *sql.DB, cache cache.ICache) *SQLiteLookup {
 }
 
 func (l *SQLiteLookup) Insert(origin, code string) error {
-	SQL := `insert into lookup (origin, code) values (?, ?)`
-	if _, err := l.db.Exec(SQL, origin, code); err != nil {
+	var lkp Lookup
+	SQL := `insert into lookup (origin, code) values (?, ?)
+			returning id, origin, code, clicks, created_at`
+
+	if err := l.db.QueryRow(SQL, origin, code).Scan(
+		&lkp.ID,
+		&lkp.Origin,
+		&lkp.Code,
+		&lkp.Clicks,
+		&lkp.CreatedAt,
+	); err != nil {
 		var sqliteErr sqlite3.Error
 		if errors.As(err, &sqliteErr) {
 			if sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
@@ -47,34 +58,45 @@ func (l *SQLiteLookup) Insert(origin, code string) error {
 		return err
 	}
 
-	if err := l.cache.Set(context.Background(), code, origin, 300*time.Second); err != nil {
+	if err := l.cache.Set(context.Background(), code, lkp, 300*time.Second); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (l *SQLiteLookup) GetByCode(code string) (string, error) {
-	SQL := `select origin from lookup where code = ? limit 1`
-	var origin string
+func (l *SQLiteLookup) GetByCode(code string) (*Lookup, error) {
+	var lkp Lookup
 
-	res, err := l.cache.Get(context.Background(), code)
+	err := l.cache.Get(context.Background(), code, &lkp)
 	if err == nil {
-		slog.Info("cache hit", "url", res, "code", code)
-		return res, nil
+		slog.Info("cache hit", "url", lkp.Origin, "code", lkp.Code, "clicks", lkp.Clicks, "created_at", lkp.CreatedAt)
+		return &lkp, nil
 	}
 
 	if !errors.Is(err, cache.ErrCacheMiss) {
-		return "", err
+		return nil, err
 	}
 
-	if err := l.db.QueryRow(SQL, code).Scan(&origin); err != nil {
+	SQL := `select id, origin, code, clicks, created_at from lookup where code = ? limit 1`
+	if err := l.db.QueryRow(SQL, code).Scan(
+		&lkp.ID,
+		&lkp.Origin,
+		&lkp.Code,
+		&lkp.Clicks,
+		&lkp.CreatedAt,
+	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return "", ErrNotFound
+			return nil, ErrNotFound
 		}
 
-		return "", err
+		return nil, err
 	}
 
-	return origin, nil
+	// save back to cache
+	if err = l.cache.Set(context.Background(), code, lkp, 300*time.Second); err != nil {
+		return nil, err
+	}
+
+	return &lkp, nil
 }
