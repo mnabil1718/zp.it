@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	urlib "net/url"
 	"strings"
@@ -107,7 +108,7 @@ func (a *App) GetCounterData(c *echo.Context) error {
 	// Check if full URL or just code
 	if strings.Contains(url, "://") || strings.Contains(url, ".") {
 		u, err := urlib.Parse(url)
-		if err != nil {
+		if err != nil || (u.Host != "" && (u.Path == "" || u.Path == "/")) {
 			return echo.NewHTTPError(http.StatusBadRequest, "Invalid URL format")
 		}
 
@@ -130,6 +131,8 @@ func (a *App) GetCounterData(c *echo.Context) error {
 		Clicks: lkp.Clicks,
 		Since:  lkp.CreatedAt,
 	}
+
+	c.Response().Header().Set("Cache-Control", "no-store")
 	return c.Render(200, "counter-result", data)
 }
 
@@ -147,7 +150,11 @@ func (a *App) CodeHandler(c *echo.Context) error {
 	}
 
 	// runs in goroutine, non-blocking redirect
-	go a.Models.Lookup.IncrementClicks(cd)
+	go func() {
+		if err := a.Models.Lookup.IncrementClicks(cd); err != nil {
+			slog.Error("Cannot increment clicks", "code", cd, "error", err)
+		}
+	}()
 
 	return c.Redirect(http.StatusFound, origin)
 }

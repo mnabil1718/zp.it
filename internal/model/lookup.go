@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"log/slog"
 	"time"
 
 	"github.com/mattn/go-sqlite3"
@@ -20,9 +19,13 @@ type Lookup struct {
 }
 
 type ILookup interface {
+	// insert a new record to DB. Set code, origin as k, v in cache
 	Insert(origin, code string) error
-	GetOriginByCode(code string) (string, error) // faster for redirect
+	// get only origin, if exists from cache. Faster for redirection
+	GetOriginByCode(code string) (string, error)
+	// get full row, no caching
 	GetByCode(code string) (*Lookup, error)
+	// increment clicks by 1 by code. No caching
 	IncrementClicks(code string) error
 }
 
@@ -39,17 +42,9 @@ func NewSQliteLookup(db *sql.DB, cache cache.ICache) *SQLiteLookup {
 }
 
 func (l *SQLiteLookup) Insert(origin, code string) error {
-	var lkp Lookup
-	SQL := `insert into lookup (origin, code) values (?, ?)
-			returning id, origin, code, clicks, created_at`
+	SQL := `insert into lookup (origin, code) values (?, ?)`
 
-	if err := l.db.QueryRow(SQL, origin, code).Scan(
-		&lkp.ID,
-		&lkp.Origin,
-		&lkp.Code,
-		&lkp.Clicks,
-		&lkp.CreatedAt,
-	); err != nil {
+	if _, err := l.db.Exec(SQL, origin, code); err != nil {
 		var sqliteErr sqlite3.Error
 		if errors.As(err, &sqliteErr) {
 			if sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
@@ -60,14 +55,13 @@ func (l *SQLiteLookup) Insert(origin, code string) error {
 		return err
 	}
 
-	if err := l.cache.Set(context.Background(), code, lkp.Origin, 300*time.Second); err != nil {
+	if err := l.cache.Set(context.Background(), code, origin, 300*time.Second); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// No cache hit here because cache only stores origin url
 func (l *SQLiteLookup) GetByCode(code string) (*Lookup, error) {
 	var lkp Lookup
 
