@@ -10,4 +10,6 @@
   {{ else }}
     <div id="error-display" hx-swap-oob="true"></div>
   {{ end }}
+  <!-- empty primary content so HTMX processes the OOB swap -->
+  <span></span>
 {{ end }}

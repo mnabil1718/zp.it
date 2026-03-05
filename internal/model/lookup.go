@@ -4,10 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"log/slog"
 	"time"
 
+	"github.com/mattn/go-sqlite3"
 	"github.com/mnabil1718/zp.it/internal/cache"
 )
 
@@ -37,6 +37,13 @@ func NewSQliteLookup(db *sql.DB, cache cache.ICache) *SQLiteLookup {
 func (l *SQLiteLookup) Insert(origin, code string) error {
 	SQL := `insert into lookup (origin, code) values (?, ?)`
 	if _, err := l.db.Exec(SQL, origin, code); err != nil {
+		var sqliteErr sqlite3.Error
+		if errors.As(err, &sqliteErr) {
+			if sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
+				return ErrAlreadyExists
+			}
+		}
+
 		return err
 	}
 
@@ -62,7 +69,6 @@ func (l *SQLiteLookup) GetByCode(code string) (string, error) {
 	}
 
 	if err := l.db.QueryRow(SQL, code).Scan(&origin); err != nil {
-		fmt.Println("HAHAHAH ERRRORRR DBBBB")
 		if errors.Is(err, sql.ErrNoRows) {
 			return "", ErrNotFound
 		}

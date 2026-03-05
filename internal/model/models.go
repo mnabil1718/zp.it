@@ -13,5 +13,6 @@ func NewModels(lu ILookup) *Models {
 }
 
 var (
-	ErrNotFound = errors.New("record not found")
+	ErrNotFound      = errors.New("record not found")
+	ErrAlreadyExists = errors.New("resource already exists")
 )

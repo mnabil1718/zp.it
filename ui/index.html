@@ -19,11 +19,19 @@
       hx-swap="innerHTML"
       hx-disabled-elt="find button[type='submit']"
     >
-      <!-- custom alias input (hidden by default) -->
-      <div id="custom-alias-row" class="hidden flex items-center gap-2 mb-2">
-        <span class="text-sm font-semibold text-slate-500 whitespace-nowrap"
-          >{{ .Host | stripScheme }}</span
-        >
+      <!-- MAIN URL INPUT -->
+      <input
+        id="url"
+        type="url"
+        name="url"
+        pattern="https?://.*?\..*"
+        required
+        placeholder="https://example.com/my-long-url"
+        class="block w-full rounded-md bg-white px-4.5 py-3 text-base text-slate-600 outline-1 -outline-offset-1 outline-slate-600/30 placeholder:text-slate-400 focus:outline-2 focus:-outline-offset-2 focus:outline-sky-800 mb-2"
+      />
+
+      <div id="alias-container" class="hidden text-left">
+        <!-- CUSTOM ALIAS INPUT -->
         <input
           id="alias"
           type="text"
@@ -32,26 +40,63 @@
           pattern="[a-zA-Z0-9\-_]+"
           minlength="3"
           maxlength="24"
-          class="block w-full rounded-md bg-white px-4.5 py-3 text-base text-slate-600 outline-1 -outline-offset-1 outline-slate-600/30 placeholder:text-slate-400 focus:outline-2 focus:-outline-offset-2 focus:outline-sky-800"
+          class="mb-1 block w-full rounded-md bg-white px-4.5 py-3 text-base text-slate-600 outline-1 -outline-offset-1 outline-slate-600/30 placeholder:text-slate-400 focus:outline-2 focus:-outline-offset-2 focus:outline-sky-800"
           oninput="
-      if (this.validity.patternMismatch) {
-        this.setCustomValidity('Only letters, numbers, hyphens and underscores allowed');
-      } else {
-        this.setCustomValidity('');
-      }
-    "
+          if (this.validity.patternMismatch) {
+            this.setCustomValidity('Only letters, numbers, hyphens and underscores allowed');
+          } else {
+            this.setCustomValidity('');
+          }
+          document.getElementById('alias-preview').textContent = 'Preview: {{ .Host }}' + this.value;
+          "
         />
+        <span id="alias-preview" class="text-xs font-medium text-slate-500"
+          >Preview: {{ .Host }}</span
+        >
       </div>
-      <!-- MAIN INPUT -->
-      <div class="flex items-center gap-2">
-        <input
-          id="url"
-          type="url"
-          name="url"
-          required
-          placeholder="https://example.com/my-long-url"
-          class="block w-full rounded-md bg-white px-4.5 py-3 text-base text-slate-600 outline-1 -outline-offset-1 outline-slate-600/30 placeholder:text-slate-400 focus:outline-2 focus:-outline-offset-2 focus:outline-sky-800"
-        />
+
+      <!-- CHECKBOXES -->
+      <div class="flex items-center gap-5 mt-4 mb-10 flex-wrap">
+        <!-- custom alias toggle checkbox -->
+        <div class="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="custom-alias-toggle"
+            class="size-4 accent-sky-800 cursor-pointer"
+            onchange="
+            document.getElementById('alias-container').classList.toggle('hidden', !this.checked);
+            if (!this.checked) {
+                document.getElementById('alias').value = ''
+                document.getElementById('alias-preview').textContent = 'Preview: {{ .Host }}'
+            };
+            "
+          />
+          <label
+            for="custom-alias-toggle"
+            class="text-sm text-slate-500 cursor-pointer font-medium"
+          >
+            Use custom alias
+          </label>
+        </div>
+
+        <!-- QR Checkbox -->
+        <div class="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="qr"
+            name="qr"
+            class="size-4 accent-sky-800 cursor-pointer"
+          />
+          <label
+            for="qr"
+            class="text-sm text-slate-500 cursor-pointer font-medium"
+            >Generate QR code for this link</label
+          >
+        </div>
+      </div>
+
+      <!-- MAIN SUBMIT BUTTON -->
+      <div class="flex w-full justify-center">
         <button
           type="submit"
           class="cursor-pointer flex items-center gap-1 px-4 py-3 bg-sky-800 text-white rounded-md font-semibold text-sm disabled:opacity-50 whitespace-nowrap"
@@ -83,38 +128,6 @@
           <span class="my-indicator">Loading</span>
           <span class="my-no-indicator">Shorten Link</span>
         </button>
-      </div>
-
-      <!-- custom alias toggle checkbox -->
-      <div class="flex items-center gap-2 mt-3">
-        <input
-          type="checkbox"
-          id="custom-alias-toggle"
-          class="size-4 accent-sky-800 cursor-pointer"
-          onchange="document.getElementById('custom-alias-row').classList.toggle('hidden', !this.checked);
-              if (!this.checked) document.getElementById('alias').value = '';"
-        />
-        <label
-          for="custom-alias-toggle"
-          class="text-sm text-slate-500 cursor-pointer font-medium"
-        >
-          Use a custom alias
-        </label>
-      </div>
-
-      <!-- QR Checkbox -->
-      <div class="flex items-center gap-2 mt-3">
-        <input
-          type="checkbox"
-          id="qr"
-          name="qr"
-          class="size-4 accent-sky-800 cursor-pointer"
-        />
-        <label
-          for="qr"
-          class="text-sm text-slate-500 cursor-pointer font-medium"
-          >Also generate a QR Code for this link</label
-        >
       </div>
     </form>
 
