@@ -66,13 +66,35 @@ func (app *App) setupServer() {
 		Level: 5,
 	}))
 	e.Use(middleware.RequestLogger())
+	// loose limiter
+	e.Use(middleware.RateLimiterWithConfig(middleware.RateLimiterConfig{
+		Store: middleware.NewRateLimiterMemoryStoreWithConfig(
+			middleware.RateLimiterMemoryStoreConfig{
+				Rate:      10,
+				Burst:     20,
+				ExpiresIn: 3 * time.Minute,
+			},
+		),
+	}))
+
 	e.HTTPErrorHandler = ErrorHandler
 
 	e.GET("/", app.Index)
 	e.GET("/health", app.Health)
 	e.GET("/counter", app.Counter)
 	e.POST("/counter", app.GetCounterData)
-	e.POST("/generate", app.Generate)
+
+	// /generate is more abuse prone
+	strictLimiter := middleware.RateLimiterWithConfig(middleware.RateLimiterConfig{
+		Store: middleware.NewRateLimiterMemoryStoreWithConfig(
+			middleware.RateLimiterMemoryStoreConfig{
+				Rate:      2,
+				Burst:     5,
+				ExpiresIn: 5 * time.Minute,
+			},
+		),
+	})
+	e.POST("/generate", app.Generate, strictLimiter)
 	e.GET("/:code", app.CodeHandler)
 
 	app.Server = &http.Server{
