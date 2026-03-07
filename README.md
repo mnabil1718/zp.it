@@ -10,7 +10,6 @@
 ![Redis](https://img.shields.io/badge/Redis-Cache-FF4438?style=flat&logo=redis&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat)
 
----
 
 ## Live Demo
 [https://zpit.up.railway.app](https://zpit.up.railway.app)
@@ -25,7 +24,6 @@
 - Click counter
 <img width="1829" height="917" alt="Screenshot from 2026-03-07 16-03-49" src="https://github.com/user-attachments/assets/e2a36f8d-0841-445c-a48d-6aaf839251c4" />
 
----
 
 ## Features
 
@@ -36,7 +34,6 @@
 - **No Account Required** — Just paste, shorten, and share. Zero friction.
 - **Hypermedia-driven UI** — Snappy, SPA-like experience powered by HTMX — no heavy JavaScript framework
 
----
 
 ## Tech Stack
 
@@ -49,7 +46,6 @@
 
 > **Why this stack?** Go keeps the binary lean and fast. SQLite means zero-config persistence — just a file. Redis handles hot-path lookups so the database barely breaks a sweat. HTMX delivers interactivity without shipping a JS framework to the browser.
 
----
 
 ## Getting Started
 
@@ -100,8 +96,6 @@
 docker compose up
 ```
 
----
-
 ## Usage
 
 ### Shorten a URL
@@ -117,8 +111,6 @@ Navigate to `/counter` or click **"See shortlink click counter"** to look up cli
 - Allowed characters: letters, numbers, hyphens (`-`), underscores (`_`)
 - Length: 3–24 characters
 - First-come, first-served — aliases are unique
-
----
 
 ## Project Structure
 ```
@@ -138,7 +130,6 @@ zp.it/
 ├── go.mod
 └── README.md
 ```
----
 
 ## Contributing
 
@@ -167,21 +158,21 @@ Please make sure your code is formatted with `gofmt` and passes any existing tes
 - [ ] REST API with JSON responses
 - [ ] Analytics charts on the counter page
 
----
+
 
 ## Reporting Issues
 
 Found a bug? Have a feature request? [Open an issue](https://github.com/mnabil1718/zp.it/issues) and describe it clearly. Include steps to reproduce for bugs if possible.
 
----
 
-## 📄 License
+
+## License
 
 This project is licensed under the **MIT License** — see the [LICENSE](./LICENSE) file for details.
 
----
 
-## 🙏 Acknowledgements
+
+## Acknowledgements
 
 - [HTMX](https://htmx.org/) for making server-side rendering fun again
 - [go-redis](https://github.com/redis/go-redis) for the Redis client
